@@ -1,10 +1,3 @@
-# Generated based on: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/install/iam_policy.json
-# Commit version:     https://github.com/kubernetes-sigs/aws-load-balancer-controller/commit/cc59a8c6bd521f2e334b81cb0132652fbb3f5d9d
-# Tool used:          https://github.com/flosell/iam-policy-json-to-terraform
-# Matches chart:      version: 1.4.1
-#                     appVersion: v2.4.1
-
-
 data "aws_iam_policy_document" "policy" {
   statement {
     sid       = ""
@@ -126,14 +119,14 @@ data "aws_iam_policy_document" "policy" {
 
     condition {
       test     = "Null"
-      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
-      values   = ["true"]
+      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
+      values   = ["false"]
     }
 
     condition {
       test     = "Null"
-      variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
-      values   = ["false"]
+      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
+      values   = ["true"]
     }
   }
 
@@ -250,6 +243,35 @@ data "aws_iam_policy_document" "policy" {
       test     = "Null"
       variable = "aws:ResourceTag/elbv2.k8s.aws/cluster"
       values   = ["false"]
+    }
+  }
+
+  statement {
+    sid    = ""
+    effect = "Allow"
+
+    resources = [
+      "arn:aws:elasticloadbalancing:*:*:targetgroup/*/*",
+      "arn:aws:elasticloadbalancing:*:*:loadbalancer/net/*/*",
+      "arn:aws:elasticloadbalancing:*:*:loadbalancer/app/*/*",
+    ]
+
+    actions = ["elasticloadbalancing:AddTags"]
+
+    condition {
+      test     = "Null"
+      variable = "aws:RequestTag/elbv2.k8s.aws/cluster"
+      values   = ["false"]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "elasticloadbalancing:CreateAction"
+
+      values = [
+        "CreateTargetGroup",
+        "CreateLoadBalancer",
+      ]
     }
   }
 
